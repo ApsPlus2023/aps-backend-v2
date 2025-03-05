@@ -26,7 +26,10 @@ app.register(jwt, {
 registerRoutes(app);
 
 app.register(cors, {
-  origin: 'https://aps-frontend-v2-dq9o.vercel.app',
+  origin: [
+    'https://aps-frontend-v2-dq9o.vercel.app',
+    'http://localhost:3000'
+  ],
   credentials: true,
 });
 

@@ -26,7 +26,10 @@ app.register(jwt_1.default, {
 });
 (0, index_1.registerRoutes)(app);
 app.register(cors_1.default, {
-    origin: 'https://aps-frontend-v2-dq9o.vercel.app',
+    origin: [
+        'https://aps-frontend-v2-dq9o.vercel.app',
+        'http://localhost:3000'
+    ],
     credentials: true,
 });
 const port = process.env.PORT || 3030;
