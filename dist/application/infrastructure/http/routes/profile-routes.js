@@ -19,7 +19,7 @@ function profileRoutes(fastify) {
                     yield request.jwtVerify();
                 }
                 catch (err) {
-                    reply.send(err);
+                    return reply.status(401).send({ error: "Token inválido ou ausente" });
                 }
             });
         });

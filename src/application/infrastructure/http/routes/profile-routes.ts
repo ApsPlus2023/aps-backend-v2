@@ -12,12 +12,13 @@ export async function profileRoutes(fastify: FastifyInstance) {
     try {
       await request.jwtVerify();
     } catch (err) {
-      reply.send(err);
+      return reply.status(401).send({ error: "Token inválido ou ausente" });
     }
   });
 
   fastify.get("/me", { preHandler: [fastify.authenticate] }, async (request: FastifyRequest, reply: FastifyReply) => {
     const payload = request.user as { id: string };
+
     if (!payload?.id) {
       return reply.status(401).send({ error: "Usuário não autenticado" });
     }
