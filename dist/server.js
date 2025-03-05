@@ -29,10 +29,11 @@ app.register(cors_1.default, {
     origin: 'https://aps-frontend-v2-dq9o.vercel.app',
     credentials: true,
 });
-app.listen({ port: 3030 }, (err, address) => {
+const port = process.env.PORT || 3030;
+app.listen({ port: 3030, host: '0.0.0.0' }, (err, address) => {
     if (err) {
         console.error(err);
         process.exit(1);
     }
-    console.log(`Servidor rodando em http://localhost:3030`);
+    console.log(`Servidor rodando em ${address}`);
 });
