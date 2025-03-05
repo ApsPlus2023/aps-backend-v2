@@ -29,5 +29,4 @@ export async function registerRoutes(app: FastifyInstance) {
   app.register(employeeDetailRoutes);
   app.register(consultationsByMonthRoutes);
   app.register(dashboardExtraStatsRoutes);
-
 }
