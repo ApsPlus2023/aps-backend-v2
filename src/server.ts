@@ -3,19 +3,17 @@ import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import { registerRoutes } from './application/routes/index';
-import { env } from './application/config/env'; // ou onde você define sua secret
+import { env } from './application/config/env';
 
 const app = fastify();
 
-// Registra o cookie
 app.register(cookie, {
   secret: 'V`cW_WcXY',
   parseOptions: {}
 });
 
-// Registra o JWT para usar cookies
 app.register(jwt, {
-  secret: env.JWT_SECRET, // sua secret definida no env
+  secret: env.JWT_SECRET,
   cookie: {
     cookieName: 'token',
     signed: false,
@@ -25,11 +23,10 @@ app.register(jwt, {
   },
 });
 
-// Registra as rotas (incluindo login, profile, etc.)
 registerRoutes(app);
 
 app.register(cors, {
-  origin: 'http://localhost:3000',
+  origin: 'https://aps-frontend-v2-dq9o.vercel.app',
   credentials: true,
 });
 
