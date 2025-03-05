@@ -7,11 +7,12 @@ export async function authRoutes(fastify: FastifyInstance) {
       const { email, password } = request.body as { email: string; password: string };
       const { token } = await authenticateUser({ email, password });
 
+      // Envia o token via cookie com opções de segurança para produção
       reply.setCookie("token", token, {
         path: "/",
         httpOnly: true,
-        secure: true,
-        sameSite: "none", 
+        secure: true,        // O cookie só é enviado via HTTPS
+        sameSite: "none",    // Permite requisições cross-site
       });
 
       return reply.send({ token });

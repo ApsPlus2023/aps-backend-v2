@@ -13,6 +13,8 @@ exports.profileRoutes = profileRoutes;
 const prisma_client_1 = require("../../../infrastructure/database/prisma-client");
 function profileRoutes(fastify) {
     return __awaiter(this, void 0, void 0, function* () {
+        // Middleware para verificar o token JWT; com a configuração do fastify-jwt,
+        // o token é extraído automaticamente do cookie 'token'
         fastify.decorate("authenticate", function (request, reply) {
             return __awaiter(this, void 0, void 0, function* () {
                 try {
