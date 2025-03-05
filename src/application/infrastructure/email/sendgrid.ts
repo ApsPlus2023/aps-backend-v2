@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendPasswordCreationEmail(email: string, userId: string) {
-  const link = `http://localhost:3000/criar-senha?userId=${userId}`;
+  const link = `https://aps-frontend-v2-dq9o.vercel.app/criar-senha?userId=${userId}`;
 
   const mailOptions = {
     from: process.env.GMAIL_USER,
