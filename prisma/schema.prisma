@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  EMPLOYEE
+  PATIENT
+}
+
+enum EmployeeRole {
+  ENFERMEIRO
+  MEDICO
+  ADMINISTRADOR
+  ATENDENTE
+}
+
+enum UserStatus {
+  ATIVO
+  INATIVO
+}
+
+enum BloodType {
+  O_PLUS
+  O_MINUS
+  A_PLUS
+  A_MINUS
+  B_PLUS
+  B_MINUS
+  AB_PLUS
+  AB_MINUS
+}
+
+model User {
+  id            String      @id @default(uuid())
+  name          String
+  email         String      @unique
+  phone         String
+  address       String
+  password      String?
+  profilePhoto  String?
+  type          UserType
+  status        UserStatus  @default(ATIVO)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  cpf           String?     @unique
+  rg            String?
+  profession    String?
+  bloodType     BloodType?
+  dateOfBirth   DateTime?
+  employeeRole  EmployeeRole?
+  hireDate      DateTime?
+  workDays      String?
+  MedicalRecord MedicalRecord? 
+  consultationsAsPatient Consultation[] @relation("PatientRelation")
+  consultationsAsDoctor Consultation[] @relation("DoctorRelation")
+
+  @@map("users")
+}
+
+
+model MedicalRecord {
+  id             String         @id @default(uuid())
+  recordNumber   String         @unique
+  prescriptions  Prescription[] 
+  diagnoses      Diagnosis[]
+  patient        User           @relation(fields: [patientId], references: [id])
+  patientId      String         @unique
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Prescription {
+  id               String         @id @default(uuid())
+  description      String
+  medicalRecord    MedicalRecord  @relation(fields: [medicalRecordId], references: [id])
+  medicalRecordId  String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model Diagnosis {
+  id               String         @id @default(uuid())
+  description      String
+  medicalRecord    MedicalRecord  @relation(fields: [medicalRecordId], references: [id])
+  medicalRecordId  String
+  createdAt        DateTime       @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Consultation {
+  id          String    @id @default(uuid())
+  patient     User      @relation("PatientRelation", fields: [patientId], references: [id])
+  patientId   String
+  doctor      User?     @relation("DoctorRelation", fields: [doctorId], references: [id])
+  doctorId    String?
+  scheduledAt DateTime
+  jitsiLink   String?
+  canceled    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
