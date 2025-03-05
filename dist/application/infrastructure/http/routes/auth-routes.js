@@ -20,7 +20,8 @@ function authRoutes(fastify) {
                 reply.setCookie("token", token, {
                     path: "/",
                     httpOnly: true,
-                    sameSite: "lax",
+                    secure: true,
+                    sameSite: "none",
                 });
                 return reply.send({ token });
             }
