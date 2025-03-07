@@ -1,112 +1,107 @@
-import { FastifyInstance } from 'fastify'
-import { prisma } from '../../../infrastructure/database/prisma-client'
+import { FastifyInstance } from 'fastify';
+import { prisma } from '../../../infrastructure/database/prisma-client';
 
 export async function consultationRoutes(fastify: FastifyInstance) {
   fastify.post('/consultations', async (request, reply) => {
     try {
       const { patientId, scheduledAt, doctorId } = request.body as {
-        patientId: string
-        scheduledAt: string 
-        doctorId?: string
-      }
+        patientId: string;
+        scheduledAt: string;
+        doctorId?: string;
+      };
 
-      const patient = await prisma.user.findUnique({ where: { id: patientId } })
+      const patient = await prisma.user.findUnique({ where: { id: patientId } });
       if (!patient) {
-        return reply.status(404).send({ error: 'Paciente não encontrado' })
+        return reply.status(404).send({ error: 'Paciente não encontrado' });
       }
       if (patient.type !== 'PATIENT') {
-        return reply.status(400).send({ error: 'Usuário não é do tipo PATIENT' })
+        return reply.status(400).send({ error: 'Usuário não é do tipo PATIENT' });
       }
 
-      const jitsiRoom = `meet-${Math.floor(Math.random() * 100000)}`
-      const jitsiLink = `https://meet.jit.si/${jitsiRoom}`
+      const jitsiRoom = `meet-${Math.floor(Math.random() * 100000)}`;
+      const jitsiLink = `https://meet.jit.si/${jitsiRoom}`;
 
-      const [datePart, timePart] = scheduledAt.split(' ')
-      // Cuidado: dependendo do formato da data, talvez seja melhor utilizar parseLocalDateTime
-      const newDate = new Date(`${datePart}T${timePart}:00.000Z`)
+      const [datePart, timePart] = scheduledAt.split(' ');
+      const newDate = new Date(`${datePart}T${timePart}:00.000Z`);
 
       const created = await prisma.consultation.create({
         data: {
           patientId,
           scheduledAt: newDate,
-          jitsiLink, 
+          jitsiLink,
           doctorId: doctorId || null,
         },
-      })
+      });
 
-      return reply.status(201).send(created)
+      return reply.status(201).send(created);
     } catch (error) {
-      console.error(error)
-      return reply.status(400).send({ error: 'Erro ao criar consulta' })
+      console.error(error);
+      return reply.status(400).send({ error: 'Erro ao criar consulta' });
     }
-  })
+  });
 
-  // Atualizamos a rota DELETE para fazer soft delete (definir canceled: true)
   fastify.delete('/consultations/:id', async (request, reply) => {
     try {
-      const { id } = request.params as { id: string }
+      const { id } = request.params as { id: string };
 
-      const existing = await prisma.consultation.findUnique({ where: { id } })
+      const existing = await prisma.consultation.findUnique({ where: { id } });
       if (!existing) {
-        return reply.status(404).send({ error: 'Consulta não encontrada' })
+        return reply.status(404).send({ error: 'Consulta não encontrada' });
       }
 
-      // Em vez de deletar, atualizamos o campo "canceled" para true
       await prisma.consultation.update({
         where: { id },
         data: { canceled: true },
-      })
+      });
 
-      return reply.status(204).send()
+      return reply.status(204).send();
     } catch (error) {
-      console.error(error)
-      return reply.status(400).send({ error: 'Erro ao cancelar consulta' })
+      console.error(error);
+      return reply.status(400).send({ error: 'Erro ao cancelar consulta' });
     }
-  })
+  });
 
   fastify.get('/consultations', async (request, reply) => {
     try {
-      const { patientId } = request.query as { patientId?: string }
+      const { patientId } = request.query as { patientId?: string };
 
-      const whereClause = patientId ? { patientId } : {}
+      const whereClause = patientId ? { patientId, canceled: false } : { canceled: false };
 
       const consultations = await prisma.consultation.findMany({
         where: whereClause,
         include: {
-          patient: {
-            select: { id: true, name: true },
-          },
-          doctor: {
-            select: { id: true, name: true },
-          },
+          patient: { select: { id: true, name: true } },
+          doctor: { select: { id: true, name: true } },
         },
-      })
+      });
 
       const result = consultations.map((cons) => {
-        const d = cons.scheduledAt
-        const year = d.getUTCFullYear()
-        const month = String(d.getUTCMonth() + 1).padStart(2, '0')
-        const day = String(d.getUTCDate()).padStart(2, '0')
-        const hours = String(d.getUTCHours()).padStart(2, '0')
-        const mins = String(d.getUTCMinutes()).padStart(2, '0')
-        const formatted = `${year}-${month}-${day} ${hours}:${mins}`
+        const d = cons.scheduledAt;
+        const year = d.getUTCFullYear();
+        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        const hours = String(d.getUTCHours()).padStart(2, '0');
+        const mins = String(d.getUTCMinutes()).padStart(2, '0');
+        const rawFormatted = `${year}-${month}-${day} ${hours}:${mins}`;
+        const displayFormatted = `${day}/${month}/${year} ${hours}:${mins}`;
 
         return {
           id: cons.id,
-          scheduledAt: formatted,
+          scheduledAt: rawFormatted,
+          scheduledAtFormatted: displayFormatted,
           patientId: cons.patientId,
           patientName: cons.patient?.name ?? 'Paciente',
           doctorId: cons.doctor?.id ?? null,
           doctorName: cons.doctor?.name ?? null,
           jitsiLink: cons.jitsiLink,
           canceled: cons.canceled,
-        }
-      })
+        };
+      });
 
-      return reply.send({ consultations: result })
+      return reply.send({ consultations: result });
     } catch (error) {
-      console.error(error)
-      return reply.status(400).send({ error: 'Erro ao buscar consultas' })
+      console.error(error);
+      return reply.status(400).send({ error: 'Erro ao buscar consultas' });
     }
-  })
+  });
 }
