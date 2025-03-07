@@ -8,8 +8,6 @@ declare module 'fastify' {
 }
 
 export async function profileRoutes(fastify: FastifyInstance) {
-  // Middleware para verificar o token JWT; com a configuração do fastify-jwt,
-  // o token é extraído automaticamente do cookie 'token'
   fastify.decorate("authenticate", async function (request: FastifyRequest, reply: FastifyReply) {
     try {
       await request.jwtVerify();

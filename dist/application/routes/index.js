@@ -24,6 +24,7 @@ const dashboard_stats_1 = require("../infrastructure/http/routes/dashboard-stats
 const employee_detail_1 = require("../infrastructure/http/routes/employee-detail");
 const consultations_by_month_1 = require("../infrastructure/http/routes/consultations-by-month");
 const dashboard_extra_stats_1 = require("../infrastructure/http/routes/dashboard-extra-stats");
+const change_password_routes_1 = require("../infrastructure/http/routes/change-password-routes");
 function registerRoutes(app) {
     return __awaiter(this, void 0, void 0, function* () {
         app.register(auth_routes_1.authRoutes);
@@ -40,5 +41,6 @@ function registerRoutes(app) {
         app.register(employee_detail_1.employeeDetailRoutes);
         app.register(consultations_by_month_1.consultationsByMonthRoutes);
         app.register(dashboard_extra_stats_1.dashboardExtraStatsRoutes);
+        app.register(change_password_routes_1.changePasswordRoutes);
     });
 }
