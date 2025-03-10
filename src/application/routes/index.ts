@@ -14,6 +14,7 @@ import { employeeDetailRoutes } from '../infrastructure/http/routes/employee-det
 import { consultationsByMonthRoutes } from "../infrastructure/http/routes/consultations-by-month";
 import {dashboardExtraStatsRoutes  } from '../infrastructure/http/routes/dashboard-extra-stats'
 import { changePasswordRoutes  } from '../infrastructure/http/routes/change-password-routes'
+import { patientConsultationRoutes  } from '../infrastructure/http/routes/patient-consultation-routes'
 
 export async function registerRoutes(app: FastifyInstance) {
   app.register(authRoutes);
@@ -31,4 +32,5 @@ export async function registerRoutes(app: FastifyInstance) {
   app.register(consultationsByMonthRoutes);
   app.register(dashboardExtraStatsRoutes);
   app.register(changePasswordRoutes);
+  app.register(patientConsultationRoutes);
 }
