@@ -13,15 +13,14 @@ exports.medicalRecordRoutes = medicalRecordRoutes;
 const prisma_client_1 = require("../../../infrastructure/database/prisma-client");
 function medicalRecordRoutes(fastify) {
     return __awaiter(this, void 0, void 0, function* () {
-        // (A) Listar todos os prontuários
         fastify.get("/medical-records", (request, reply) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const medicalRecords = yield prisma_client_1.prisma.medicalRecord.findMany({
                     include: {
-                        patient: true, // Traz informações do Paciente
-                        // Se quiser prescrições e diagnósticos resumidos, inclua:
+                        patient: true,
                         prescriptions: true,
                         diagnoses: true,
+                        soapNotes: true,
                     },
                 });
                 return reply.send({ medicalRecords });
@@ -31,7 +30,6 @@ function medicalRecordRoutes(fastify) {
                 return reply.status(400).send({ error: errorMessage });
             }
         }));
-        // (B) Buscar um prontuário específico
         fastify.get("/medical-records/:id", (request, reply) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = request.params;
@@ -41,6 +39,7 @@ function medicalRecordRoutes(fastify) {
                         patient: true,
                         prescriptions: true,
                         diagnoses: true,
+                        soapNotes: true,
                     },
                 });
                 if (!medicalRecord) {
@@ -53,10 +52,9 @@ function medicalRecordRoutes(fastify) {
                 return reply.status(400).send({ error: errorMessage });
             }
         }));
-        // (C) Criar prontuário (POST)
         fastify.post("/medical-records", (request, reply) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { patientId, recordNumber } = request.body;
+                const { patientId, recordNumber, soapNote } = request.body;
                 const patient = yield prisma_client_1.prisma.user.findUnique({
                     where: { id: patientId },
                 });
@@ -78,6 +76,35 @@ function medicalRecordRoutes(fastify) {
                         patientId: patientId,
                     },
                 });
+                if (soapNote) {
+                    yield prisma_client_1.prisma.soapNote.create({
+                        data: {
+                            medicalRecordId: newRecord.id,
+                            chiefComplaint: soapNote.chiefComplaint,
+                            additionalInfo: soapNote.additionalInfo,
+                            allergies: soapNote.allergies,
+                            bloodPressureSystolic: soapNote.pressaoSistolica ? parseInt(soapNote.pressaoSistolica) : undefined,
+                            bloodPressureDiastolic: soapNote.pressaoDiastolica ? parseInt(soapNote.pressaoDiastolica) : undefined,
+                            respiratoryRate: soapNote.freqRespiratoria ? parseInt(soapNote.freqRespiratoria) : undefined,
+                            heartRate: soapNote.freqCardiaca ? parseInt(soapNote.freqCardiaca) : undefined,
+                            headCircumference: soapNote.perimetroCefalico ? parseFloat(soapNote.perimetroCefalico) : undefined,
+                            oxygenSaturation: soapNote.saturacaoOxigenio ? parseFloat(soapNote.saturacaoOxigenio) : undefined,
+                            abdominalCircumference: soapNote.circAbdominal ? parseFloat(soapNote.circAbdominal) : undefined,
+                            temperature: soapNote.temperatura ? parseFloat(soapNote.temperatura) : undefined,
+                            glycemia: soapNote.glicemia ? parseFloat(soapNote.glicemia) : undefined,
+                            weight: soapNote.peso ? parseFloat(soapNote.peso) : undefined,
+                            height: soapNote.altura ? parseFloat(soapNote.altura) : undefined,
+                            bmi: soapNote.imc ? parseFloat(soapNote.imc) : undefined,
+                            previousProblems: soapNote.previousProblems,
+                            additionalAssessment: soapNote.additionalAssessment,
+                            requestedExams: soapNote.requestedExams,
+                            referral: soapNote.referral,
+                            manualPrescription: soapNote.manualPrescription,
+                            planAdditionalInfo: soapNote.planAdditionalInfo,
+                            reminders: soapNote.reminders,
+                        },
+                    });
+                }
                 return reply.status(201).send(newRecord);
             }
             catch (error) {
@@ -85,14 +112,11 @@ function medicalRecordRoutes(fastify) {
                 return reply.status(400).send({ error: errorMessage });
             }
         }));
-        // (D) Atualizar prontuário (PATCH)
         fastify.patch("/medical-records/:id", (request, reply) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = request.params;
-                const { recordNumber } = request.body;
-                const record = yield prisma_client_1.prisma.medicalRecord.findUnique({
-                    where: { id },
-                });
+                const { recordNumber, soapNote } = request.body;
+                const record = yield prisma_client_1.prisma.medicalRecord.findUnique({ where: { id } });
                 if (!record) {
                     return reply.status(404).send({ error: "Prontuário não encontrado" });
                 }
@@ -100,6 +124,41 @@ function medicalRecordRoutes(fastify) {
                     where: { id },
                     data: Object.assign({}, (recordNumber && { recordNumber })),
                 });
+                if (soapNote) {
+                    const latestSoap = yield prisma_client_1.prisma.soapNote.findFirst({
+                        where: { medicalRecordId: id },
+                        orderBy: { createdAt: 'desc' },
+                    });
+                    if (latestSoap) {
+                        yield prisma_client_1.prisma.soapNote.update({
+                            where: { id: latestSoap.id },
+                            data: {
+                                chiefComplaint: soapNote.chiefComplaint,
+                                additionalInfo: soapNote.additionalInfo,
+                                allergies: soapNote.allergies,
+                                bloodPressureSystolic: soapNote.pressaoSistolica ? parseInt(soapNote.pressaoSistolica) : undefined,
+                                bloodPressureDiastolic: soapNote.pressaoDiastolica ? parseInt(soapNote.pressaoDiastolica) : undefined,
+                                respiratoryRate: soapNote.freqRespiratoria ? parseInt(soapNote.freqRespiratoria) : undefined,
+                                heartRate: soapNote.freqCardiaca ? parseInt(soapNote.freqCardiaca) : undefined,
+                                headCircumference: soapNote.perimetroCefalico ? parseFloat(soapNote.perimetroCefalico) : undefined,
+                                oxygenSaturation: soapNote.saturacaoOxigenio ? parseFloat(soapNote.saturacaoOxigenio) : undefined,
+                                abdominalCircumference: soapNote.circAbdominal ? parseFloat(soapNote.circAbdominal) : undefined,
+                                temperature: soapNote.temperatura ? parseFloat(soapNote.temperatura) : undefined,
+                                glycemia: soapNote.glicemia ? parseFloat(soapNote.glicemia) : undefined,
+                                weight: soapNote.peso ? parseFloat(soapNote.peso) : undefined,
+                                height: soapNote.altura ? parseFloat(soapNote.altura) : undefined,
+                                bmi: soapNote.imc ? parseFloat(soapNote.imc) : undefined,
+                                previousProblems: soapNote.previousProblems,
+                                additionalAssessment: soapNote.additionalAssessment,
+                                requestedExams: soapNote.requestedExams,
+                                referral: soapNote.referral,
+                                manualPrescription: soapNote.manualPrescription,
+                                planAdditionalInfo: soapNote.planAdditionalInfo,
+                                reminders: soapNote.reminders,
+                            },
+                        });
+                    }
+                }
                 return reply.send(updated);
             }
             catch (error) {
@@ -107,13 +166,10 @@ function medicalRecordRoutes(fastify) {
                 return reply.status(400).send({ error: errorMessage });
             }
         }));
-        // (E) Deletar prontuário (DELETE)
         fastify.delete("/medical-records/:id", (request, reply) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = request.params;
-                const record = yield prisma_client_1.prisma.medicalRecord.findUnique({
-                    where: { id },
-                });
+                const record = yield prisma_client_1.prisma.medicalRecord.findUnique({ where: { id } });
                 if (!record) {
                     return reply.status(404).send({ error: "Prontuário não encontrado" });
                 }

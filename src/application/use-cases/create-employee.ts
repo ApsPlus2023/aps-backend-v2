@@ -5,11 +5,13 @@ interface CreateEmployeeInput {
   name: string;
   email: string;
   phone: string;
-  employeeRole: string; // cargo, por exemplo: "Médico", "Enfermeiro", etc.
+  employeeRole: string; // exemplo: "Médico", "Enfermeiro", etc.
   hireDate: Date;
   workDays: string;
   profilePhoto?: string;
   address: string;
+  coren?: string; // opcional para enfermeiros
+  crm?: string;   // opcional para médicos
 }
 
 /**
@@ -45,6 +47,8 @@ export async function createEmployee(data: CreateEmployeeInput) {
       workDays: data.workDays,
       profilePhoto: data.profilePhoto,
       address: data.address,
+      coren: data.coren,
+      crm: data.crm,
       password: null,
     },
   });

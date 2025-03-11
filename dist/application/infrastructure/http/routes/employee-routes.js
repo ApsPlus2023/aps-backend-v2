@@ -16,7 +16,7 @@ function employeeRoutes(fastify) {
     return __awaiter(this, void 0, void 0, function* () {
         fastify.post('/employees', (request, reply) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { name, email, phone, employeeRole, hireDate, workDays, profilePhoto, address, } = request.body;
+                const { name, email, phone, employeeRole, hireDate, workDays, profilePhoto, address, coren, crm, } = request.body;
                 const employee = yield (0, create_employee_1.createEmployee)({
                     name,
                     email,
@@ -26,6 +26,8 @@ function employeeRoutes(fastify) {
                     workDays,
                     profilePhoto,
                     address,
+                    coren,
+                    crm,
                 });
                 return reply.status(201).send(employee);
             }
@@ -50,6 +52,8 @@ function employeeRoutes(fastify) {
                         status: true,
                         address: true,
                         createdAt: true,
+                        coren: true,
+                        crm: true,
                     },
                 });
                 return reply.send({ employees });

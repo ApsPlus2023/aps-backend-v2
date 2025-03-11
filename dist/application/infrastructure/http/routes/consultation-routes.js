@@ -15,7 +15,10 @@ function consultationRoutes(fastify) {
     return __awaiter(this, void 0, void 0, function* () {
         fastify.post('/consultations', (request, reply) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { patientId, scheduledAt, doctorId } = request.body;
+                const { patientId, scheduledAt, doctorId, 
+                // Campos do SOAP (Subjetivo, Objetivo, Avaliação e Plano)
+                motivoPrincipal, infoAdicionaisSubjetivo, alergias, pressaoSistolica, pressaoDiastolica, freqRespiratoria, freqCardiaca, perimetroCefalico, saturacaoOxigenio, circAbdominal, temperatura, glicemia, peso, altura, imc, problemasCondicoesCID, infoAdicionaisAvaliacao, solicitacaoExames, pedidoEncaminhamento, prescricaoManual, infoAdicionaisPlano, lembretes, } = request.body;
+                // Valida o paciente
                 const patient = yield prisma_client_1.prisma.user.findUnique({ where: { id: patientId } });
                 if (!patient) {
                     return reply.status(404).send({ error: 'Paciente não encontrado' });
@@ -23,11 +26,14 @@ function consultationRoutes(fastify) {
                 if (patient.type !== 'PATIENT') {
                     return reply.status(400).send({ error: 'Usuário não é do tipo PATIENT' });
                 }
+                // Gera link para Jitsi
                 const jitsiRoom = `meet-${Math.floor(Math.random() * 100000)}`;
                 const jitsiLink = `https://meet.jit.si/${jitsiRoom}`;
+                // Converte a data/hora informada
                 const [datePart, timePart] = scheduledAt.split(' ');
                 const newDate = new Date(`${datePart}T${timePart}:00.000Z`);
-                const created = yield prisma_client_1.prisma.consultation.create({
+                // Cria a consulta
+                const createdConsultation = yield prisma_client_1.prisma.consultation.create({
                     data: {
                         patientId,
                         scheduledAt: newDate,
@@ -35,7 +41,71 @@ function consultationRoutes(fastify) {
                         doctorId: doctorId || null,
                     },
                 });
-                return reply.status(201).send(created);
+                // Obtém ou cria o prontuário do paciente
+                let medicalRecord = yield prisma_client_1.prisma.medicalRecord.findUnique({
+                    where: { patientId },
+                });
+                if (!medicalRecord) {
+                    const recordNumber = "PRT-" + Date.now().toString();
+                    medicalRecord = yield prisma_client_1.prisma.medicalRecord.create({
+                        data: {
+                            patientId,
+                            recordNumber,
+                        },
+                    });
+                }
+                // Se houver algum campo do SOAP, cria o registro em SoapNote
+                if (motivoPrincipal ||
+                    infoAdicionaisSubjetivo ||
+                    alergias ||
+                    pressaoSistolica ||
+                    pressaoDiastolica ||
+                    freqRespiratoria ||
+                    freqCardiaca ||
+                    perimetroCefalico ||
+                    saturacaoOxigenio ||
+                    circAbdominal ||
+                    temperatura ||
+                    glicemia ||
+                    peso ||
+                    altura ||
+                    imc ||
+                    problemasCondicoesCID ||
+                    infoAdicionaisAvaliacao ||
+                    solicitacaoExames ||
+                    pedidoEncaminhamento ||
+                    prescricaoManual ||
+                    infoAdicionaisPlano ||
+                    lembretes) {
+                    yield prisma_client_1.prisma.soapNote.create({
+                        data: {
+                            medicalRecordId: medicalRecord.id,
+                            chiefComplaint: motivoPrincipal,
+                            additionalInfo: infoAdicionaisSubjetivo,
+                            allergies: alergias,
+                            bloodPressureSystolic: pressaoSistolica ? parseInt(pressaoSistolica) : undefined,
+                            bloodPressureDiastolic: pressaoDiastolica ? parseInt(pressaoDiastolica) : undefined,
+                            respiratoryRate: freqRespiratoria ? parseInt(freqRespiratoria) : undefined,
+                            heartRate: freqCardiaca ? parseInt(freqCardiaca) : undefined,
+                            headCircumference: perimetroCefalico ? parseFloat(perimetroCefalico) : undefined,
+                            oxygenSaturation: saturacaoOxigenio ? parseFloat(saturacaoOxigenio) : undefined,
+                            abdominalCircumference: circAbdominal ? parseFloat(circAbdominal) : undefined,
+                            temperature: temperatura ? parseFloat(temperatura) : undefined,
+                            glycemia: glicemia ? parseFloat(glicemia) : undefined,
+                            weight: peso ? parseFloat(peso) : undefined,
+                            height: altura ? parseFloat(altura) : undefined,
+                            bmi: imc ? parseFloat(imc) : undefined,
+                            previousProblems: problemasCondicoesCID,
+                            additionalAssessment: infoAdicionaisAvaliacao,
+                            requestedExams: solicitacaoExames,
+                            referral: pedidoEncaminhamento,
+                            manualPrescription: prescricaoManual,
+                            planAdditionalInfo: infoAdicionaisPlano,
+                            reminders: lembretes,
+                        },
+                    });
+                }
+                return reply.status(201).send(createdConsultation);
             }
             catch (error) {
                 console.error(error);

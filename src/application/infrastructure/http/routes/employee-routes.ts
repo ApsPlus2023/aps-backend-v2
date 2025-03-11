@@ -15,6 +15,8 @@ export async function employeeRoutes(fastify: FastifyInstance) {
         workDays,
         profilePhoto,
         address,
+        coren,
+        crm,
       } = request.body as {
         name: string;
         email: string;
@@ -24,6 +26,8 @@ export async function employeeRoutes(fastify: FastifyInstance) {
         workDays: string;
         profilePhoto?: string;
         address: string;
+        coren?: string;
+        crm?: string;
       };
 
       const employee = await createEmployee({
@@ -35,6 +39,8 @@ export async function employeeRoutes(fastify: FastifyInstance) {
         workDays,
         profilePhoto,
         address,
+        coren,
+        crm,
       });
 
       return reply.status(201).send(employee);
@@ -60,7 +66,9 @@ export async function employeeRoutes(fastify: FastifyInstance) {
           profilePhoto: true,
           status: true,
           address: true,
-          createdAt: true, 
+          createdAt: true,
+          coren: true,
+          crm: true,
         },
       });
       return reply.send({ employees });

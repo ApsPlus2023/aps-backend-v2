@@ -43,6 +43,8 @@ function createEmployee(data) {
                 workDays: data.workDays,
                 profilePhoto: data.profilePhoto,
                 address: data.address,
+                coren: data.coren,
+                crm: data.crm,
                 password: null,
             },
         });

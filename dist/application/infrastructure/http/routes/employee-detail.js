@@ -30,6 +30,8 @@ function employeeDetailRoutes(fastify) {
                     address: true,
                     createdAt: true,
                     type: true,
+                    coren: true,
+                    crm: true,
                 },
             });
             if (!employee || employee.type !== "EMPLOYEE") {
