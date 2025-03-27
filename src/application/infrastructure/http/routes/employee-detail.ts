@@ -16,13 +16,18 @@ export async function employeeDetailRoutes(fastify: FastifyInstance) {
         workDays: true,
         profilePhoto: true,
         status: true,
-        address: true,
+        cep: true,
+        rua: true,
+        bairro: true,
+        numero: true,
+        complemento: true,
         createdAt: true,
         type: true,
         coren: true, 
-        crm: true, 
+        crm: true,
       },
     });
+
     if (!employee || employee.type !== "EMPLOYEE") {
       return reply.status(404).send({ error: "Funcionário não encontrado" });
     }

@@ -11,12 +11,16 @@ async function main() {
       name: "TESTE",
       email: "pietro@gmail.com",
       phone: "11980141941",
-      address: "Rua Exemplo, 123",
+      cep: "01001000",
+      rua: "Praça da Sé",
+      bairro: "Sé",
+      numero: "100",
+      complemento: "Apto 101",
       password: passwordHash,
       type: "EMPLOYEE",
       cpf: "52824862880",
       employeeRole: "ADMINISTRADOR",
-      status:"ATIVO"
+      status: "ATIVO"
     },
   });
 

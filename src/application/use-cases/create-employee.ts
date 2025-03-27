@@ -1,5 +1,5 @@
-import { prisma } from '../infrastructure/database/prisma-client';
-import { sendPasswordCreationEmail } from '../infrastructure/email/sendgrid';
+import { prisma } from "../infrastructure/database/prisma-client";
+import { sendPasswordCreationEmail } from "../infrastructure/email/sendgrid";
 
 interface CreateEmployeeInput {
   name: string;
@@ -9,7 +9,12 @@ interface CreateEmployeeInput {
   hireDate: Date;
   workDays: string;
   profilePhoto?: string;
-  address: string;
+  // Novos campos de endereço:
+  cep?: string;
+  rua?: string;
+  bairro?: string;
+  numero?: string;
+  complemento?: string;
   coren?: string; // opcional para enfermeiros
   crm?: string;   // opcional para médicos
 }
@@ -19,17 +24,17 @@ interface CreateEmployeeInput {
  */
 function mapEmployeeRole(
   role: string
-): 'ENFERMEIRO' | 'MEDICO' | 'ADMINISTRADOR' | 'ATENDENTE' {
+): "ENFERMEIRO" | "MEDICO" | "ADMINISTRADOR" | "ATENDENTE" {
   switch (role.toLowerCase()) {
-    case 'médico':
-    case 'medico':
-      return 'MEDICO';
-    case 'enfermeiro':
-      return 'ENFERMEIRO';
-    case 'administrador':
-      return 'ADMINISTRADOR';
-    case 'atendente':
-      return 'ATENDENTE';
+    case "médico":
+    case "medico":
+      return "MEDICO";
+    case "enfermeiro":
+      return "ENFERMEIRO";
+    case "administrador":
+      return "ADMINISTRADOR";
+    case "atendente":
+      return "ATENDENTE";
     default:
       throw new Error(`Cargo inválido: ${role}`);
   }
@@ -41,12 +46,16 @@ export async function createEmployee(data: CreateEmployeeInput) {
       name: data.name,
       email: data.email,
       phone: data.phone,
-      type: 'EMPLOYEE',
+      type: "EMPLOYEE",
       employeeRole: mapEmployeeRole(data.employeeRole),
       hireDate: data.hireDate,
       workDays: data.workDays,
       profilePhoto: data.profilePhoto,
-      address: data.address,
+      cep: data.cep,
+      rua: data.rua,
+      bairro: data.bairro,
+      numero: data.numero,
+      complemento: data.complemento,
       coren: data.coren,
       crm: data.crm,
       password: null,

@@ -5,12 +5,16 @@ interface CreatePatientInput {
   name: string;
   email: string;
   phone: string;
-  address: string;
   cpf: string;
   rg?: string;
   profession?: string;
   bloodType?: string;
   dateOfBirth?: Date;
+  cep?: string;
+  rua?: string;
+  bairro?: string;
+  numero?: string;
+  complemento?: string;
 }
 
 function mapBloodType(
@@ -48,17 +52,20 @@ function mapBloodType(
 }
 
 export async function createPatient(data: CreatePatientInput) {
-  const finalBloodType = data.bloodType
-    ? mapBloodType(data.bloodType)
-    : null as any;
+  const finalBloodType = data.bloodType ? mapBloodType(data.bloodType) : null as any;
 
-  // 1) Cria o paciente
+  // 1) Cria o paciente, agora incluindo os dados de endereço detalhados
   const patient = await prisma.user.create({
     data: {
       name: data.name,
       email: data.email,
       phone: data.phone,
-      address: data.address,
+      // Armazenamos os novos campos de endereço:
+      cep: data.cep,
+      rua: data.rua,
+      bairro: data.bairro,
+      numero: data.numero,
+      complemento: data.complemento,
       password: null,
       type: 'PATIENT',
       cpf: data.cpf,
@@ -69,10 +76,10 @@ export async function createPatient(data: CreatePatientInput) {
     },
   });
 
-  // 2) Cria recordNumber
+  // 2) Gera o recordNumber (prontuário)
   const recordNumber = 'PRT-' + Date.now().toString();
 
-  // 3) Cria prontuário
+  // 3) Cria o prontuário associado ao paciente
   await prisma.medicalRecord.create({
     data: {
       recordNumber,
@@ -80,7 +87,7 @@ export async function createPatient(data: CreatePatientInput) {
     },
   });
 
-  // 4) Email de criação de senha
+  // 4) Envia e-mail para criação de senha
   await sendPasswordCreationEmail(patient.email, patient.id);
 
   return patient;

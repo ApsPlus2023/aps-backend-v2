@@ -36,16 +36,19 @@ function mapBloodType(value) {
 }
 function createPatient(data) {
     return __awaiter(this, void 0, void 0, function* () {
-        const finalBloodType = data.bloodType
-            ? mapBloodType(data.bloodType)
-            : null;
-        // 1) Cria o paciente
+        const finalBloodType = data.bloodType ? mapBloodType(data.bloodType) : null;
+        // 1) Cria o paciente, agora incluindo os dados de endereço detalhados
         const patient = yield prisma_client_1.prisma.user.create({
             data: {
                 name: data.name,
                 email: data.email,
                 phone: data.phone,
-                address: data.address,
+                // Armazenamos os novos campos de endereço:
+                cep: data.cep,
+                rua: data.rua,
+                bairro: data.bairro,
+                numero: data.numero,
+                complemento: data.complemento,
                 password: null,
                 type: 'PATIENT',
                 cpf: data.cpf,
@@ -55,16 +58,16 @@ function createPatient(data) {
                 dateOfBirth: data.dateOfBirth,
             },
         });
-        // 2) Cria recordNumber
+        // 2) Gera o recordNumber (prontuário)
         const recordNumber = 'PRT-' + Date.now().toString();
-        // 3) Cria prontuário
+        // 3) Cria o prontuário associado ao paciente
         yield prisma_client_1.prisma.medicalRecord.create({
             data: {
                 recordNumber,
                 patientId: patient.id,
             },
         });
-        // 4) Email de criação de senha
+        // 4) Envia e-mail para criação de senha
         yield (0, sendgrid_1.sendPasswordCreationEmail)(patient.email, patient.id);
         return patient;
     });

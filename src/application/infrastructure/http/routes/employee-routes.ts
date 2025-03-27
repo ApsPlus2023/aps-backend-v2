@@ -3,7 +3,7 @@ import { createEmployee } from '../../../use-cases/create-employee';
 import { prisma } from '../../../infrastructure/database/prisma-client';
 
 export async function employeeRoutes(fastify: FastifyInstance) {
-  
+  // (1) Criar um funcionário (POST /employees)
   fastify.post('/employees', async (request, reply) => {
     try {
       const {
@@ -14,7 +14,11 @@ export async function employeeRoutes(fastify: FastifyInstance) {
         hireDate,
         workDays,
         profilePhoto,
-        address,
+        cep,
+        rua,
+        bairro,
+        numero,
+        complemento,
         coren,
         crm,
       } = request.body as {
@@ -25,7 +29,11 @@ export async function employeeRoutes(fastify: FastifyInstance) {
         hireDate: string; 
         workDays: string;
         profilePhoto?: string;
-        address: string;
+        cep?: string;
+        rua?: string;
+        bairro?: string;
+        numero?: string;
+        complemento?: string;
         coren?: string;
         crm?: string;
       };
@@ -38,7 +46,11 @@ export async function employeeRoutes(fastify: FastifyInstance) {
         hireDate: new Date(hireDate),
         workDays,
         profilePhoto,
-        address,
+        cep,
+        rua,
+        bairro,
+        numero,
+        complemento,
         coren,
         crm,
       });
@@ -51,6 +63,7 @@ export async function employeeRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // (2) Listar todos os funcionários (GET /employees)
   fastify.get('/employees', async (request, reply) => {
     try {
       const employees = await prisma.user.findMany({
@@ -65,7 +78,12 @@ export async function employeeRoutes(fastify: FastifyInstance) {
           workDays: true,
           profilePhoto: true,
           status: true,
-          address: true,
+          // Novos campos de endereço
+          cep: true,
+          rua: true,
+          bairro: true,
+          numero: true,
+          complemento: true,
           createdAt: true,
           coren: true,
           crm: true,
@@ -79,6 +97,7 @@ export async function employeeRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // (3) Excluir funcionário (DELETE /employees/:id)
   fastify.delete('/employees/:id', async (request, reply) => {
     try {
       const { id } = request.params as { id: string };

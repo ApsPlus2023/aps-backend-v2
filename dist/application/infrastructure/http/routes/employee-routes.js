@@ -14,9 +14,10 @@ const create_employee_1 = require("../../../use-cases/create-employee");
 const prisma_client_1 = require("../../../infrastructure/database/prisma-client");
 function employeeRoutes(fastify) {
     return __awaiter(this, void 0, void 0, function* () {
+        // (1) Criar um funcionário (POST /employees)
         fastify.post('/employees', (request, reply) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { name, email, phone, employeeRole, hireDate, workDays, profilePhoto, address, coren, crm, } = request.body;
+                const { name, email, phone, employeeRole, hireDate, workDays, profilePhoto, cep, rua, bairro, numero, complemento, coren, crm, } = request.body;
                 const employee = yield (0, create_employee_1.createEmployee)({
                     name,
                     email,
@@ -25,7 +26,11 @@ function employeeRoutes(fastify) {
                     hireDate: new Date(hireDate),
                     workDays,
                     profilePhoto,
-                    address,
+                    cep,
+                    rua,
+                    bairro,
+                    numero,
+                    complemento,
                     coren,
                     crm,
                 });
@@ -36,6 +41,7 @@ function employeeRoutes(fastify) {
                 return reply.status(400).send({ error: errorMessage });
             }
         }));
+        // (2) Listar todos os funcionários (GET /employees)
         fastify.get('/employees', (request, reply) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const employees = yield prisma_client_1.prisma.user.findMany({
@@ -50,7 +56,12 @@ function employeeRoutes(fastify) {
                         workDays: true,
                         profilePhoto: true,
                         status: true,
-                        address: true,
+                        // Novos campos de endereço
+                        cep: true,
+                        rua: true,
+                        bairro: true,
+                        numero: true,
+                        complemento: true,
                         createdAt: true,
                         coren: true,
                         crm: true,
@@ -63,6 +74,7 @@ function employeeRoutes(fastify) {
                 return reply.status(400).send({ error: errorMessage });
             }
         }));
+        // (3) Excluir funcionário (DELETE /employees/:id)
         fastify.delete('/employees/:id', (request, reply) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = request.params;

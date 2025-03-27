@@ -17,15 +17,15 @@ const sendgrid_1 = require("../infrastructure/email/sendgrid");
  */
 function mapEmployeeRole(role) {
     switch (role.toLowerCase()) {
-        case 'médico':
-        case 'medico':
-            return 'MEDICO';
-        case 'enfermeiro':
-            return 'ENFERMEIRO';
-        case 'administrador':
-            return 'ADMINISTRADOR';
-        case 'atendente':
-            return 'ATENDENTE';
+        case "médico":
+        case "medico":
+            return "MEDICO";
+        case "enfermeiro":
+            return "ENFERMEIRO";
+        case "administrador":
+            return "ADMINISTRADOR";
+        case "atendente":
+            return "ATENDENTE";
         default:
             throw new Error(`Cargo inválido: ${role}`);
     }
@@ -37,12 +37,16 @@ function createEmployee(data) {
                 name: data.name,
                 email: data.email,
                 phone: data.phone,
-                type: 'EMPLOYEE',
+                type: "EMPLOYEE",
                 employeeRole: mapEmployeeRole(data.employeeRole),
                 hireDate: data.hireDate,
                 workDays: data.workDays,
                 profilePhoto: data.profilePhoto,
-                address: data.address,
+                cep: data.cep,
+                rua: data.rua,
+                bairro: data.bairro,
+                numero: data.numero,
+                complemento: data.complemento,
                 coren: data.coren,
                 crm: data.crm,
                 password: null,

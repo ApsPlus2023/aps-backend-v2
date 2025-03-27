@@ -40,7 +40,11 @@ model User {
   name          String
   email         String   @unique
   phone         String
-  address       String
+  cep           String?
+  rua           String?
+  bairro        String?
+  numero        String?
+  complemento   String?
   password      String?
   profilePhoto  String?
   type          UserType
@@ -57,7 +61,7 @@ model User {
   workDays      String?
   coren         String?
   crm           String?
-  MedicalRecord         MedicalRecord?
+  MedicalRecord MedicalRecord?
   consultationsAsPatient Consultation[] @relation("PatientRelation")
   consultationsAsDoctor   Consultation[] @relation("DoctorRelation")
   notifications           Notification[]
@@ -76,35 +80,34 @@ model MedicalRecord {
   updatedAt    DateTime @updatedAt
 }
 
-
 model SoapNote {
   id              String        @id @default(uuid())
   medicalRecordId String
   medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  chiefComplaint   String?
-  additionalInfo   String?
-  allergies        String?
-  bloodPressureSystolic      Int?
-  bloodPressureDiastolic     Int?
-  respiratoryRate            Int?
-  heartRate                  Int?
-  headCircumference          Float?
-  oxygenSaturation           Float?
-  abdominalCircumference     Float?
-  temperature                Float?
-  glycemia                   Float?
-  weight                     Float?
-  height                     Float?
-  bmi                        Float?
-  previousProblems           String?
-  additionalAssessment       String?
-  requestedExams             String? 
-  referral                   String?
-  manualPrescription         String?
-  planAdditionalInfo         String?
-  reminders                  String? 
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  chiefComplaint  String?
+  additionalInfo  String?
+  allergies       String?
+  bloodPressureSystolic Int?
+  bloodPressureDiastolic Int?
+  respiratoryRate Int?
+  heartRate       Int?
+  headCircumference Float?
+  oxygenSaturation Float?
+  abdominalCircumference Float?
+  temperature     Float?
+  glycemia        Float?
+  weight          Float?
+  height          Float?
+  bmi             Float?
+  previousProblems String?
+  additionalAssessment String?
+  requestedExams  String?
+  referral        String?
+  manualPrescription String?
+  planAdditionalInfo String?
+  reminders       String?
 }
 
 model Prescription {
@@ -112,7 +115,6 @@ model Prescription {
   description      String
   medicalRecordId  String
   medicalRecord    MedicalRecord  @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
-
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 }
