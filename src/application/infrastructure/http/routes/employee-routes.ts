@@ -103,7 +103,7 @@ export async function employeeRoutes(fastify: FastifyInstance) {
       const { id } = request.params as { id: string };
       const employee = await prisma.user.findUnique({ where: { id } });
       if (!employee || employee.type !== 'EMPLOYEE') {
-        return reply.status(404).send({ error: 'Funcionário não encontrado' });
+        return reply.status(404).send({ error: 'Funcionário não encontrado!' });
       }
       await prisma.user.delete({ where: { id } });
       return reply.status(204).send();
